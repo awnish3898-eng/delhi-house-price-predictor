@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}EstateAI | About Project & Documentation{% endblock %}
+
+{% block extra_head %}
+<style>
+    .about-hero {
+        margin-bottom: 24px;
+    }
+
+    .about-hero h2 {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.8px;
+        margin-bottom: 8px;
+        color: #1e293b;
+    }
+
+    .about-hero p {
+        color: var(--text-muted);
+        font-size: 14.5px;
+        max-width: 680px;
+        line-height: 1.5;
+    }
+
+    .doc-section {
+        margin-bottom: 28px;
+    }
+
+    .doc-section h3 {
+        font-size: 19px;
+        font-weight: 800;
+        color: #ea580c;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .doc-section p, .doc-section li {
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.7;
+    }
+
+    .tech-stack-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+    }
+
+    .tech-box {
+        background: #fffaf5;
+        border: 1.5px solid #ffedd5;
+        border-radius: var(--radius-md);
+        padding: 16px;
+    }
+
+    .tech-box h4 {
+        font-size: 14px;
+        color: #ea580c;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .tech-box p {
+        font-size: 12.5px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .viva-card {
+        background: #fffaf5;
+        border: 1.5px solid #ffedd5;
+        border-radius: var(--radius-md);
+        padding: 18px 20px;
+        margin-bottom: 12px;
+    }
+
+    .viva-question {
+        font-size: 14.5px;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 6px;
+    }
+
+    .viva-answer {
+        font-size: 13.5px;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .btn-action-start {
+        display: inline-flex;
+        background: var(--primary-gradient);
+        color: #ffffff;
+        padding: 14px 28px;
+        border-radius: var(--radius-md);
+        font-size: 15px;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: 0 4px 16px var(--primary-glow);
+        transition: all 0.2s ease;
+    }
+
+    .btn-action-start:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="about-hero">
+    <h2>📖 Project Documentation & Architecture</h2>
+    <p>Comprehensive overview of data curation, machine learning algorithms, geospatial validation, and technical viva preparation.</p>
+</section>
+
+<div class="glass-card">
+    <!-- Section 1: Overview -->
+    <div class="doc-section">
+        <h3>🎯 Project Overview</h3>
+        <p>
+            <strong>EstateAI</strong> is a machine learning web application that estimates residential real estate prices across 19 prime Delhi-NCR localities. 
+            It compares three distinct regression algorithms (<strong>Random Forest</strong>, <strong>Linear Regression</strong>, and <strong>Decision Tree</strong>) 
+            and features an interactive geospatial map capable of distinguishing between operational territory and unsupported cities in real-time.
+        </p>
+    </div>
+
+    <!-- Section 2: Data Pipeline -->
+    <div class="doc-section">
+        <h3>🧹 Data Pipeline & Cleaning Methodology</h3>
+        <p>
+            The training data originated from the <strong>Kaggle Delhi-NCR Real Estate Dataset</strong> (scraped from MagicBricks). 
+            Raw web-scraped data contains missing values, advertising descriptions in locality fields, and unrealistic outliers. 
+            Our cleaning script (<code>clean_kaggle_data.py</code>):
+        </p>
+        <ul style="margin-left: 20px; margin-top: 8px;">
+            <li>Extracted and standardized 19 recognized prominent localities.</li>
+            <li>Imputed missing bathroom values based on bedroom (BHK) counts.</li>
+            <li>Filtered extreme outliers (retaining properties between 350 sq ft and 7,000 sq ft, priced between ₹15 Lakhs and ₹12 Crores).</li>
+            <li>Produced a clean, model-ready dataset (<code>cleaned_kaggle_housing.csv</code>) with <strong>742 verified listings</strong>.</li>
+        </ul>
+    </div>
+
+    <!-- Section 3: Technology Stack -->
+    <div class="doc-section">
+        <h3>🛠️ Technology Stack</h3>
+        <div class="tech-stack-grid">
+            <div class="tech-box">
+                <h4>Flask (Python 3.14)</h4>
+                <p>Lightweight WSGI web framework managing multipage routing, server-side validation, and template rendering.</p>
+            </div>
+            <div class="tech-box">
+                <h4>scikit-learn</h4>
+                <p>Core machine learning library used for One-Hot Encoding, Linear Regression, and Random Forest bagging.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Leaflet.js + OSM</h4>
+                <p>Geospatial map visualization with CartoDB Voyager tiles and operational boundary buffers.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Nominatim API</h4>
+                <p>Free, zero-key reverse geocoding to resolve clicked coordinates into city/district names.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Seaborn & Matplotlib</h4>
+                <p>Statistical data visualization generating correlation and model evaluation heatmaps.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Soft Peach Theme UI</h4>
+                <p>Light orange and pastel peach theme with collapsible slide-out drawer sidebar and Plus Jakarta typography.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Project Viva Questions -->
+    <div class="doc-section">
+        <h3>🎓 Common Viva & Interview Questions</h3>
+        
+        <div class="viva-card">
+            <div class="viva-question">Q1: Why does Random Forest perform better than Linear Regression on this dataset?</div>
+            <div class="viva-answer">
+                Real estate prices do not scale in a purely linear manner; luxury sectors and larger configurations have non-linear price spikes. 
+                Random Forest aggregates 100 decision trees trained on random subsets of data and features, capturing these non-linearities 
+                while preventing single-tree overfitting, yielding an <strong>R² score of 80.8%</strong> compared to 79.3% for Linear Regression.
+            </div>
+        </div>
+
+        <div class="viva-card">
+            <div class="viva-question">Q2: How does the map detect if a clicked location is invalid?</div>
+            <div class="viva-answer">
+                The map combines two checks: first, a client-side Haversine distance check to measure proximity to the 19 supported operating hubs 
+                (threshold: 5.0 km). Second, if outside, it queries the free OpenStreetMap Nominatim reverse geocoding API to resolve the exact 
+                city name (e.g. Gurugram, Ghaziabad, Jaipur) and displays a clear "Service Unavailable" alert.
+            </div>
+        </div>
+
+        <div class="viva-card">
+            <div class="viva-question">Q3: How are categorical location strings handled by the ML model?</div>
+            <div class="viva-answer">
+                Machine learning models require numerical matrices. We use <code>OneHotEncoder(handle_unknown='ignore')</code> wrapped inside a 
+                <code>ColumnTransformer</code> pipeline. This converts each locality into binary indicator features (0 or 1) without imposing 
+                an artificial ordinal hierarchy.
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="/" class="btn-action-start">
+            🔮 Launch Valuation Calculator &rarr;
+        </a>
+    </div>
+</div>
+{% endblock %}
