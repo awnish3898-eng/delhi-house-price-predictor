@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+
+{% block title %}EstateAI | Interactive Territory Map{% endblock %}
+
+{% block extra_head %}
+<style>
+    .map-page-hero {
+        margin-bottom: 20px;
+    }
+
+    .map-page-hero h2 {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.6px;
+        margin-bottom: 8px;
+        color: #1e293b;
+    }
+
+    .map-page-hero p {
+        color: var(--text-muted);
+        font-size: 14.5px;
+        max-width: 680px;
+    }
+
+    .map-full-wrapper {
+        background: #ffffff;
+        border: 1.5px solid var(--input-border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(251, 146, 60, 0.06);
+    }
+
+    .map-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fffaf5;
+        padding: 14px 20px;
+        border-bottom: 1.5px solid #ffedd5;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .map-legend {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    .dot-green {
+        width: 10px;
+        height: 10px;
+        background-color: #10b981;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .dot-red {
+        width: 10px;
+        height: 10px;
+        background-color: #ef4444;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .map-status-badge {
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .status-valid {
+        background: #ecfdf5;
+        border: 1.5px solid #a7f3d0;
+        color: #065f46;
+    }
+
+    .status-invalid {
+        background: #fef2f2;
+        border: 1.5px solid #fecaca;
+        color: #991b1b;
+    }
+
+    #fullMap {
+        width: 100%;
+        height: 480px;
+        z-index: 10;
+    }
+
+    .zone-action-bar {
+        background: #fffaf5;
+        padding: 16px 20px;
+        border-top: 1.5px solid #ffedd5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .zone-info-text {
+        font-size: 14px;
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    .btn-action-value {
+        background: var(--primary-gradient);
+        color: #ffffff;
+        text-decoration: none;
+        padding: 11px 22px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn-action-value:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(251, 146, 60, 0.35);
+    }
+
+    .locality-directory-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+    }
+
+    .locality-card {
+        background: #ffffff;
+        border: 1.5px solid #ffedd5;
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .locality-card:hover {
+        border-color: #f97316;
+        background: #fffaf5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(251, 146, 60, 0.08);
+    }
+
+    .loc-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .btn-mini-value {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #ea580c;
+        text-decoration: none;
+        background: #fff7ed;
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid #fed7aa;
+    }
+
+    .btn-mini-value:hover {
+        background: #f97316;
+        color: #ffffff;
+        border-color: #f97316;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="map-page-hero">
+    <h2>🗺️ Interactive Operating Territory Map</h2>
+    <p>Click anywhere on the map to verify service coverage. Locations in <strong>Green Circles</strong> are active operating zones. Clicking outside will detect and reject unsupported cities.</p>
+</section>
+
+<!-- Full Map Frame -->
+<div class="map-full-wrapper">
+    <div class="map-bar">
+        <div class="map-legend">
+            <span><span class="dot-green"></span> <strong>Active Operating Zones</strong> (19 Hubs with 5km Coverage)</span>
+            <span><span class="dot-red"></span> <strong>Outside Territory</strong> (Unsupported Cities)</span>
+        </div>
+        <div id="mapStatusBadge" class="map-status-badge status-valid">
+            ✅ Ready: Click anywhere on map
+        </div>
+    </div>
+
+    <!-- Leaflet Canvas -->
+    <div id="fullMap"></div>
+
+    <div class="zone-action-bar">
+        <div class="zone-info-text" id="zoneInfoText">
+            📍 Selected: <strong>Dwarka</strong> (Valuation models operational)
+        </div>
+        <a href="/?location=Dwarka" class="btn-action-value" id="btnLaunchValue">
+            🔮 Calculate Property Valuation in Dwarka &rarr;
+        </a>
+    </div>
+</div>
+
+<!-- Active Localities Directory -->
+<div class="glass-card" style="margin-top: 24px;">
+    <h3 style="font-size: 17px; font-weight: 800; color: #ea580c; margin-bottom: 6px;">📋 Verified Operating Directory (19 Localities)</h3>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Direct links to pre-select any of our 19 operational zones in the valuation engine:</p>
+
+    <div class="locality-directory-grid">
+        {% for loc in locations %}
+            <div class="locality-card">
+                <span class="loc-name">📍 {{ loc }}</span>
+                <a href="/?location={{ loc }}" class="btn-mini-value">Value &rarr;</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const LOCALITY_COORDS = {
+        "Alaknanda": [28.5283, 77.2514],
+        "Chhattarpur": [28.5028, 77.1824],
+        "Chittaranjan Park": [28.5380, 77.2494],
+        "Dwarka": [28.5823, 77.0500],
+        "Greater Kailash": [28.5390, 77.2384],
+        "Karol Bagh": [28.6514, 77.1907],
+        "Lajpat Nagar": [28.5677, 77.2433],
+        "Laxmi Nagar": [28.6309, 77.2776],
+        "Mehrauli": [28.5177, 77.1843],
+        "New Friends Colony": [28.5630, 77.2711],
+        "Paschim Vihar": [28.6692, 77.0949],
+        "Patel Nagar": [28.6528, 77.1648],
+        "Rohini": [28.7495, 77.0565],
+        "Safdarjung Enclave": [28.5639, 77.1983],
+        "Saket": [28.5245, 77.2066],
+        "Sarita Vihar": [28.5298, 77.2917],
+        "Sheikh Sarai": [28.5330, 77.2217],
+        "Vasant Kunj": [28.5244, 77.1558],
+        "Yamuna Vihar": [28.6974, 77.2759]
+    };
+
+    const MAX_OPERATING_DISTANCE_KM = 5.0;
+    let map = null;
+    let hubMarkers = {};
+    let activeClickMarker = null;
+
+    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function initMap() {
+        const centerCoords = [28.6139, 77.2090]; // Delhi NCT Center
+
+        map = L.map('fullMap', {
+            center: centerCoords,
+            zoom: 11,
+            minZoom: 9,
+            maxZoom: 18,
+            scrollWheelZoom: true
+        });
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        for (const [name, coords] of Object.entries(LOCALITY_COORDS)) {
+            L.circle(coords, {
+                radius: 3500,
+                color: '#10b981',
+                fillColor: '#10b981',
+                fillOpacity: 0.12,
+                weight: 1.5,
+                dashArray: '4, 4'
+            }).addTo(map);
+
+            const marker = L.circleMarker(coords, {
+                radius: 8,
+                fillColor: '#f97316',
+                color: '#ffffff',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.95
+            }).addTo(map);
+
+            marker.bindPopup(`
+                <div style="text-align: center; padding: 4px;">
+                    <div style="font-weight: 700; color: #10b981; font-size: 13px;">✅ Active Operating Zone</div>
+                    <div style="font-weight: 700; font-size: 13px; color: #1e293b; margin: 2px 0;">${name}</div>
+                    <a href="/?location=${encodeURIComponent(name)}" style="color: #ea580c; font-size: 11.5px; text-decoration: none; font-weight: 700;">Open in Calculator &rarr;</a>
+                </div>
+            `);
+
+            marker.on('click', () => {
+                handleValid(name, coords);
+            });
+
+            hubMarkers[name] = marker;
+        }
+
+        map.on('click', async (e) => {
+            await evaluateCoordinates(e.latlng.lat, e.latlng.lng);
+        });
+
+        handleValid("Dwarka", LOCALITY_COORDS["Dwarka"]);
+        setTimeout(() => map.invalidateSize(), 300);
+    }
+
+    async function evaluateCoordinates(lat, lng) {
+        let closestHub = null;
+        let minDistance = Infinity;
+
+        for (const [name, coords] of Object.entries(LOCALITY_COORDS)) {
+            const dist = calculateDistanceKm(lat, lng, coords[0], coords[1]);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestHub = name;
+            }
+        }
+
+        if (minDistance <= MAX_OPERATING_DISTANCE_KM) {
+            handleValid(closestHub, [lat, lng]);
+        } else {
+            await handleInvalid(lat, lng);
+        }
+    }
+
+    function handleValid(hubName, coords) {
+        const badge = document.getElementById('mapStatusBadge');
+        badge.className = 'map-status-badge status-valid';
+        badge.innerHTML = `✅ Active Operating Zone: ${hubName}`;
+
+        document.getElementById('zoneInfoText').innerHTML = `📍 Selected: <strong>${hubName}</strong> (Valuation models active)`;
+        
+        const btn = document.getElementById('btnLaunchValue');
+        btn.href = `/?location=${encodeURIComponent(hubName)}`;
+        btn.innerHTML = `🔮 Calculate Property Valuation in ${hubName} &rarr;`;
+        btn.style.display = 'inline-flex';
+
+        if (activeClickMarker) {
+            map.removeLayer(activeClickMarker);
+        }
+
+        activeClickMarker = L.marker(coords, {
+            icon: L.divIcon({
+                className: 'valid-pin',
+                html: `<div style="background:#10b981; color:#fff; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 0 14px #10b981; font-size:14px;">📍</div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            })
+        }).addTo(map);
+
+        activeClickMarker.bindPopup(`
+            <div style="text-align: center; padding: 4px;">
+                <div style="font-weight: 700; color: #10b981; font-size: 13px;">✅ Operating Zone</div>
+                <div style="font-weight: 700; color: #1e293b;">${hubName}</div>
+                <a href="/?location=${encodeURIComponent(hubName)}" style="color: #ea580c; font-size: 11.5px; text-decoration: none; font-weight: 700;">Launch Valuation &rarr;</a>
+            </div>
+        `).openPopup();
+    }
+
+    async function handleInvalid(lat, lng) {
+        let detectedCity = "Outside Territory";
+        try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+            if (resp.ok) {
+                const data = await resp.json();
+                const addr = data.address || {};
+                detectedCity = addr.city || addr.town || addr.county || addr.state_district || addr.state || "Unknown Region";
+            }
+        } catch (err) {
+            detectedCity = "Unsupported Region";
+        }
+
+        const badge = document.getElementById('mapStatusBadge');
+        badge.className = 'map-status-badge status-invalid';
+        badge.innerHTML = `❌ We Don't Operate in ${detectedCity}`;
+
+        document.getElementById('zoneInfoText').innerHTML = `<span style="color: #dc2626;">🚫 <strong>Service Unavailable in ${detectedCity}:</strong> We do not operate in this city/region yet.</span>`;
+
+        const btn = document.getElementById('btnLaunchValue');
+        btn.style.display = 'none';
+
+        if (activeClickMarker) {
+            map.removeLayer(activeClickMarker);
+        }
+
+        activeClickMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: 'invalid-pin',
+                html: `<div style="background:#ef4444; color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 0 16px rgba(239, 68, 68, 0.8); font-size:16px;">❌</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            })
+        }).addTo(map);
+
+        activeClickMarker.bindPopup(`
+            <div style="text-align: center; padding: 4px;">
+                <div style="font-weight: 700; color: #ef4444; font-size: 13px;">❌ Invalid Location</div>
+                <div style="font-weight: 700; color: #1e293b; margin: 2px 0;">We do not operate in ${detectedCity}</div>
+                <div style="font-size: 11px; color: #b91c1c;">Please click inside a green operating zone.</div>
+            </div>
+        `).openPopup();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        initMap();
+    });
+</script>
+{% endblock %}

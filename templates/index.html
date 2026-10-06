@@ -1,0 +1,595 @@
+{% extends "base.html" %}
+
+{% block title %}EstateAI | Valuation Calculator{% endblock %}
+
+{% block extra_head %}
+<style>
+    .hero {
+        margin-bottom: 20px;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #ea580c;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .hero h2 {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.8px;
+        line-height: 1.2;
+        margin-bottom: 8px;
+        color: #1e293b;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+        color: var(--text-muted);
+        font-size: 14.5px;
+        max-width: 650px;
+        line-height: 1.5;
+    }
+
+    /* Preset Chips */
+    .presets-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+    }
+
+    .preset-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #f97316;
+    }
+
+    .preset-chip {
+        background: #fffaf5;
+        border: 1.5px solid #fed7aa;
+        color: #c2410c;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .preset-chip:hover {
+        background: #ffedd5;
+        border-color: #f97316;
+        color: #ea580c;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(251, 146, 60, 0.12);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    @media (max-width: 640px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    label {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    select, input[type="number"], input[type="text"] {
+        width: 100%;
+        background: #ffffff;
+        border: 1.5px solid #fed7aa;
+        border-radius: var(--radius-md);
+        padding: 13px 15px;
+        color: #1e293b;
+        font-size: 14.5px;
+        font-weight: 600;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    select option {
+        background-color: #ffffff;
+        color: #1e293b;
+    }
+
+    select:focus, input:focus {
+        border-color: #f97316;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+    }
+
+    .range-slider-container {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    input[type="range"] {
+        flex: 1;
+        accent-color: #f97316;
+        cursor: pointer;
+        height: 6px;
+        background: #fed7aa;
+        border-radius: 4px;
+    }
+
+    .range-bounds {
+        font-size: 11px;
+        color: var(--text-dim);
+        font-weight: 600;
+    }
+
+    .pill-group {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+    }
+
+    .pill-btn {
+        background: #fffaf5;
+        border: 1.5px solid #fed7aa;
+        color: #64748b;
+        padding: 10px 4px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .pill-btn:hover {
+        border-color: #fb923c;
+        color: #ea580c;
+    }
+
+    .pill-btn.active {
+        background: var(--primary-gradient);
+        border-color: transparent;
+        color: #ffffff;
+        box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .field-hint {
+        font-size: 11.5px;
+        color: var(--text-muted);
+    }
+
+    .btn-predict {
+        width: 100%;
+        background: var(--primary-gradient);
+        color: #ffffff;
+        border: none;
+        padding: 16px;
+        border-radius: var(--radius-md);
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 6px 20px var(--primary-glow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn-predict:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 26px rgba(249, 115, 22, 0.35);
+    }
+
+    /* Results */
+    .results-section {
+        margin-top: 32px;
+        animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-result-card {
+        background: linear-gradient(135deg, #fffaf5 0%, #fff7ed 100%);
+        border: 1.5px solid #fed7aa;
+        border-radius: var(--radius-lg);
+        padding: 26px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(251, 146, 60, 0.08);
+    }
+
+    .hero-result-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f97316;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 4px 12px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 8px;
+    }
+
+    .hero-price {
+        font-size: 42px;
+        font-weight: 800;
+        color: #ea580c;
+        margin: 4px 0 10px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .property-meta-chips {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .meta-chip {
+        background: #ffffff;
+        border: 1px solid #fed7aa;
+        color: #c2410c;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .comparison-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .comparison-cards-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .model-card {
+        background: #ffffff;
+        border: 1.5px solid #fed7aa;
+        border-radius: var(--radius-md);
+        padding: 20px;
+        text-align: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .model-card.featured {
+        border-color: #f97316;
+        background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%);
+        box-shadow: 0 8px 24px rgba(251, 146, 60, 0.1);
+    }
+
+    .model-badge {
+        font-size: 10.5px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 8px;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
+    .badge-rf { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+    .badge-lr { background: #f0fdf4; color: #047857; border: 1px solid #bbf7d0; }
+    .badge-dt { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+
+    .model-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .model-val {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 8px 0;
+    }
+
+    .model-card.featured .model-val {
+        color: #ea580c;
+    }
+
+    .model-footer-stats {
+        display: flex;
+        justify-content: space-around;
+        padding-top: 10px;
+        border-top: 1px solid #f8fafc;
+        font-size: 11.5px;
+        color: var(--text-muted);
+    }
+
+    .error-alert {
+        background: var(--accent-red-bg);
+        border: 1.5px solid var(--accent-red-border);
+        color: var(--accent-red);
+        padding: 14px 18px;
+        border-radius: var(--radius-md);
+        font-size: 13.5px;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Header -->
+<section class="hero">
+    <div class="hero-badge">
+        ⚡ Multi-Model Valuation Engine
+    </div>
+    <h2>Smart House Price Valuation with <span class="gradient-text">Machine Learning</span></h2>
+    <p>Predict residential property rates using Random Forest, Linear Regression, and Decision Trees across 19 verified Delhi-NCR localities.</p>
+</section>
+
+<!-- Main Predictor Card -->
+<div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1.5px solid #ffedd5; padding-bottom: 14px;">
+        <h3 style="font-size: 18px; font-weight: 800; color: #ea580c;">⚙️ Property Price Estimator</h3>
+        <a href="/map" style="font-size: 13px; color: #ea580c; text-decoration: none; font-weight: 700; background: #fffaf5; padding: 6px 12px; border-radius: 8px; border: 1.5px solid #fed7aa;">🗺️ Open Interactive Map &rarr;</a>
+    </div>
+
+    <!-- Quick Presets -->
+    <div class="presets-row">
+        <span class="preset-title">⚡ Quick Presets:</span>
+        <button type="button" class="preset-chip" onclick="applyPreset('Dwarka', 1250, 3, 2)">📍 Dwarka (1250 sqft)</button>
+        <button type="button" class="preset-chip" onclick="applyPreset('Greater Kailash', 1800, 3, 3)">📍 Greater Kailash (1800 sqft)</button>
+        <button type="button" class="preset-chip" onclick="applyPreset('Rohini', 850, 2, 2)">📍 Rohini (850 sqft)</button>
+        <button type="button" class="preset-chip" onclick="applyPreset('Vasant Kunj', 2200, 4, 3)">📍 Vasant Kunj (2200 sqft)</button>
+    </div>
+
+    {% if error_message %}
+        <div class="error-alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <form method="POST" action="/" id="predictionForm">
+        <input type="hidden" name="bedrooms" id="bedrooms_input" value="{{ form_data.bedrooms }}">
+        <input type="hidden" name="bathrooms" id="bathrooms_input" value="{{ form_data.bathrooms }}">
+
+        <div class="form-grid">
+            <!-- Locality -->
+            <div class="form-group">
+                <label for="location">📍 Operating Locality</label>
+                <select name="location" id="location" required>
+                    {% for loc in locations %}
+                        <option value="{{ loc }}" {% if form_data.location == loc %}selected{% endif %}>
+                            {{ loc }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <span class="field-hint">Want to pick geographically? <a href="/map" style="color: #ea580c; font-weight: 600;">Open Map View</a></span>
+            </div>
+
+            <!-- Model Choice -->
+            <div class="form-group">
+                <label for="model_choice">🧠 Prediction Algorithm</label>
+                <select name="model_choice" id="model_choice">
+                    {% for opt in model_options %}
+                        <option value="{{ opt }}" {% if form_data.model_choice == opt %}selected{% endif %}>
+                            {{ opt }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <span class="field-hint">Random Forest achieves highest R² accuracy (80.8%)</span>
+            </div>
+
+            <!-- Built-up Area -->
+            <div class="form-group full-width">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label for="area">📐 Built-up Area (Square Feet)</label>
+                    <span id="area_display" style="font-weight: 800; color: #ea580c; font-size: 14px;">{{ form_data.area }} sq ft</span>
+                </div>
+                <input 
+                    type="number" 
+                    id="area" 
+                    name="area" 
+                    placeholder="e.g. 1200" 
+                    min="250" 
+                    max="12000" 
+                    value="{{ form_data.area }}" 
+                    oninput="syncSlider(this.value)"
+                    required
+                >
+                <div class="range-slider-container">
+                    <span class="range-bounds">300</span>
+                    <input 
+                        type="range" 
+                        id="area_slider" 
+                        min="300" 
+                        max="6000" 
+                        step="25" 
+                        value="{{ form_data.area }}"
+                        oninput="syncNumber(this.value)"
+                    >
+                    <span class="range-bounds">6,000+</span>
+                </div>
+            </div>
+
+            <!-- Bedrooms (BHK) -->
+            <div class="form-group">
+                <label>🛏️ Bedrooms (BHK)</label>
+                <div class="pill-group" id="bhk_group">
+                    <div class="pill-btn {% if form_data.bedrooms == '1' %}active{% endif %}" onclick="selectPill('bedrooms', '1', this)">1 BHK</div>
+                    <div class="pill-btn {% if form_data.bedrooms == '2' %}active{% endif %}" onclick="selectPill('bedrooms', '2', this)">2 BHK</div>
+                    <div class="pill-btn {% if form_data.bedrooms == '3' %}active{% endif %}" onclick="selectPill('bedrooms', '3', this)">3 BHK</div>
+                    <div class="pill-btn {% if form_data.bedrooms == '4' %}active{% endif %}" onclick="selectPill('bedrooms', '4', this)">4 BHK</div>
+                    <div class="pill-btn {% if form_data.bedrooms == '5' %}active{% endif %}" onclick="selectPill('bedrooms', '5', this)">5 BHK</div>
+                </div>
+            </div>
+
+            <!-- Bathrooms -->
+            <div class="form-group">
+                <label>🚿 Bathrooms</label>
+                <div class="pill-group" id="bath_group">
+                    <div class="pill-btn {% if form_data.bathrooms == '1' %}active{% endif %}" onclick="selectPill('bathrooms', '1', this)">1 Bath</div>
+                    <div class="pill-btn {% if form_data.bathrooms == '2' %}active{% endif %}" onclick="selectPill('bathrooms', '2', this)">2 Baths</div>
+                    <div class="pill-btn {% if form_data.bathrooms == '3' %}active{% endif %}" onclick="selectPill('bathrooms', '3', this)">3 Baths</div>
+                    <div class="pill-btn {% if form_data.bathrooms == '4' %}active{% endif %}" onclick="selectPill('bathrooms', '4', this)">4 Baths</div>
+                    <div class="pill-btn {% if form_data.bathrooms == '5' %}active{% endif %}" onclick="selectPill('bathrooms', '5', this)">5 Baths</div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-predict" id="predict_btn">
+            <span>🔮 Calculate Valuation</span>
+        </button>
+    </form>
+
+    <!-- Prediction Results Card -->
+    {% if results %}
+        <div class="results-section" id="resultsBlock">
+            <div class="hero-result-card">
+                <div class="hero-result-badge">
+                    🏆 Top Valuation: Random Forest Regressor
+                </div>
+                <div class="hero-price">
+                    {{ results.predictions['Random Forest'].formatted_price }}
+                </div>
+                <p style="color: var(--text-muted); font-size: 13.5px;">
+                    Estimated market value based on 100 bagged trees trained on regional transaction patterns.
+                </p>
+                <div class="property-meta-chips">
+                    <span class="meta-chip">📍 {{ form_data.location }}</span>
+                    <span class="meta-chip">📐 {{ form_data.area }} sq ft</span>
+                    <span class="meta-chip">🛏️ {{ form_data.bedrooms }} BHK</span>
+                    <span class="meta-chip">🚿 {{ form_data.bathrooms }} Bathrooms</span>
+                </div>
+            </div>
+
+            <!-- Comparison Cards Across All 3 Models -->
+            <div class="comparison-cards-grid">
+                <!-- Random Forest -->
+                <div class="model-card featured">
+                    <span class="model-badge badge-rf">🌲 Ensemble Winner</span>
+                    <div class="model-title">Random Forest</div>
+                    <div class="model-val">{{ results.predictions['Random Forest'].formatted_price }}</div>
+                    <div class="model-footer-stats">
+                        <span>R²: <strong>{{ metrics['Random Forest']['R2 Score'] }}</strong></span>
+                        <span>MAE: <strong>₹ {{ metrics['Random Forest']['MAE (₹ Lakh)'] }}L</strong></span>
+                    </div>
+                </div>
+
+                <!-- Linear Regression -->
+                <div class="model-card">
+                    <span class="model-badge badge-lr">📈 Linear Model</span>
+                    <div class="model-title">Linear Regression</div>
+                    <div class="model-val">{{ results.predictions['Linear Regression'].formatted_price }}</div>
+                    <div class="model-footer-stats">
+                        <span>R²: <strong>{{ metrics['Linear Regression']['R2 Score'] }}</strong></span>
+                        <span>MAE: <strong>₹ {{ metrics['Linear Regression']['MAE (₹ Lakh)'] }}L</strong></span>
+                    </div>
+                </div>
+
+                <!-- Decision Tree -->
+                <div class="model-card">
+                    <span class="model-badge badge-dt">🌳 Single Tree</span>
+                    <div class="model-title">Decision Tree</div>
+                    <div class="model-val">{{ results.predictions['Decision Tree'].formatted_price }}</div>
+                    <div class="model-footer-stats">
+                        <span>R²: <strong>{{ metrics['Decision Tree']['R2 Score'] }}</strong></span>
+                        <span>MAE: <strong>₹ {{ metrics['Decision Tree']['MAE (₹ Lakh)'] }}L</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function syncSlider(val) {
+        document.getElementById('area_slider').value = val;
+        document.getElementById('area_display').innerText = val + ' sq ft';
+    }
+
+    function syncNumber(val) {
+        document.getElementById('area').value = val;
+        document.getElementById('area_display').innerText = val + ' sq ft';
+    }
+
+    function selectPill(fieldName, value, element) {
+        document.getElementById(fieldName + '_input').value = value;
+        const parent = element.parentElement;
+        const buttons = parent.getElementsByClassName('pill-btn');
+        for (let btn of buttons) {
+            btn.classList.remove('active');
+        }
+        element.classList.add('active');
+    }
+
+    function applyPreset(location, area, bhk, bath) {
+        document.getElementById('location').value = location;
+        document.getElementById('area').value = area;
+        syncSlider(area);
+        
+        document.getElementById('bedrooms_input').value = bhk;
+        const bhkBtns = document.getElementById('bhk_group').getElementsByClassName('pill-btn');
+        for (let i = 0; i < bhkBtns.length; i++) {
+            bhkBtns[i].classList.toggle('active', (i + 1) === bhk);
+        }
+
+        document.getElementById('bathrooms_input').value = bath;
+        const bathBtns = document.getElementById('bath_group').getElementsByClassName('pill-btn');
+        for (let i = 0; i < bathBtns.length; i++) {
+            bathBtns[i].classList.toggle('active', (i + 1) === bath);
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const resultsEl = document.getElementById('resultsBlock');
+        if (resultsEl) {
+            resultsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+</script>
+{% endblock %}

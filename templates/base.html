@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EstateAI | Real Estate ML Platform{% endblock %}</title>
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet.js Interactive Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+        :root {
+            /* Softer, Lighter Warm Peach-Orange Theme */
+            --bg-main: #fffdfa;
+            --bg-subtle: #fffaf5;
+            --bg-card: #ffffff;
+            --bg-card-border: #ffedd5;
+            --primary: #f97316;
+            --primary-hover: #ea580c;
+            --primary-soft: #fb923c;
+            --primary-light: #fff7ed;
+            --primary-peach: #ffedd5;
+            --primary-gradient: linear-gradient(135deg, #fdba74 0%, #fb923c 50%, #f97316 100%);
+            --primary-glow: rgba(251, 146, 60, 0.22);
+            --accent-green: #10b981;
+            --accent-green-bg: #ecfdf5;
+            --accent-green-border: #a7f3d0;
+            --accent-red: #ef4444;
+            --accent-red-bg: #fef2f2;
+            --accent-red-border: #fecaca;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            --input-bg: #ffffff;
+            --input-border: #fed7aa;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(253, 186, 116, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(254, 215, 170, 0.1) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(255, 237, 213, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header Bar */
+        .top-navbar {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1.5px solid var(--bg-card-border);
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            box-shadow: 0 4px 20px rgba(251, 146, 60, 0.04);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Sidebar Toggle Button (Click to Open) */
+        .btn-sidebar-toggle {
+            background: #fff7ed;
+            border: 1.5px solid #fed7aa;
+            color: #ea580c;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 19px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(251, 146, 60, 0.08);
+        }
+
+        .btn-sidebar-toggle:hover {
+            background: #ffedd5;
+            border-color: #f97316;
+            transform: scale(1.04);
+        }
+
+        .brand-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--primary-gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: #ea580c;
+        }
+
+        .brand-text span {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ecfdf5;
+            border: 1.5px solid #a7f3d0;
+            color: #059669;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Slide-out Drawer Sidebar (Hidden by default, visible only when clicked) */
+        .sidebar-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 300px;
+            background: #ffffff;
+            border-right: 1.5px solid var(--bg-card-border);
+            z-index: 1000;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 10px 0 40px rgba(0, 0, 0, 0.12);
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-drawer.open {
+            transform: translateX(0);
+        }
+
+        /* Backdrop overlay when sidebar is open */
+        .sidebar-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(30, 41, 59, 0.35);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1.5px solid #ffedd5;
+            margin-bottom: 22px;
+        }
+
+        .btn-drawer-close {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #ea580c;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.15s ease;
+        }
+
+        .btn-drawer-close:hover {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .drawer-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .drawer-heading {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #94a3b8;
+            padding: 4px 10px;
+        }
+
+        .drawer-item a {
+            text-decoration: none;
+            color: #475569;
+            font-size: 14.5px;
+            font-weight: 600;
+            padding: 12px 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .drawer-item a:hover {
+            color: #ea580c;
+            background: #fff7ed;
+        }
+
+        .drawer-item.active a {
+            color: #ea580c;
+            background: #ffedd5;
+            font-weight: 700;
+            box-shadow: inset 4px 0 0 #f97316;
+        }
+
+        .drawer-bottom {
+            padding-top: 18px;
+            border-top: 1.5px solid #ffedd5;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .drawer-telemetry {
+            background: #fffaf5;
+            border: 1.5px solid #fed7aa;
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+        }
+
+        /* Main Content Container (Centered & Full Width) */
+        .main-wrapper {
+            width: 100%;
+            max-width: 1060px;
+            margin: 0 auto;
+            padding: 30px 18px 60px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 26px;
+        }
+
+        /* Reusable Glass Card (Soft Light Orange Styling) */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--bg-card-border);
+            border-radius: var(--radius-lg);
+            padding: 32px 30px;
+            box-shadow: 0 8px 30px rgba(251, 146, 60, 0.04);
+        }
+
+        .site-footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-dim);
+            padding: 24px 0 10px 0;
+            line-height: 1.6;
+            border-top: 1.5px solid #ffedd5;
+            margin-top: 14px;
+        }
+
+        .site-footer a {
+            color: #ea580c;
+            text-decoration: none;
+            font-weight: 700;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Slide-out Drawer Sidebar (Visible Only When Clicked) -->
+<div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<aside id="sidebarDrawer" class="sidebar-drawer">
+    <div>
+        <div class="drawer-header">
+            <div class="brand-link">
+                <div class="brand-icon">🏛️</div>
+                <div class="brand-text">
+                    <h1>EstateAI</h1>
+                    <span>Menu Navigation</span>
+                </div>
+            </div>
+            <button type="button" class="btn-drawer-close" onclick="toggleSidebar()" title="Close Menu">✕</button>
+        </div>
+
+        <ul class="drawer-menu">
+            <span class="drawer-heading">Platform Pages</span>
+            <li class="drawer-item {% if active_page == 'home' %}active{% endif %}">
+                <a href="/">
+                    <span>🏠</span>
+                    <span>Valuation Calculator</span>
+                </a>
+            </li>
+            <li class="drawer-item {% if active_page == 'map' %}active{% endif %}">
+                <a href="/map">
+                    <span>🗺️</span>
+                    <span>Territory Map</span>
+                </a>
+            </li>
+            <li class="drawer-item {% if active_page == 'about' %}active{% endif %}">
+                <a href="/about">
+                    <span>📖</span>
+                    <span>Project Documentation</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="drawer-bottom">
+        <div class="drawer-telemetry">
+            <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#ea580c; margin-bottom:3px;">
+                <span class="pulse-dot"></span>
+                <span>19 Operating Zones Active</span>
+            </div>
+            <p style="font-size:11.5px; color:#64748b; line-height:1.4;">Trained on 742 Kaggle verified transactions with 80.8% R² accuracy.</p>
+        </div>
+        <div style="font-size:11px; color:#94a3b8; text-align:center;">
+            Click ✕ or outside to close sidebar
+        </div>
+    </div>
+</aside>
+
+<!-- Top Navbar with Clickable Sidebar Menu Toggle -->
+<header class="top-navbar">
+    <div class="header-left">
+        <button type="button" class="btn-sidebar-toggle" onclick="toggleSidebar()" title="Open Navigation Menu">
+            ☰
+        </button>
+
+        <a href="/" class="brand-link">
+            <div class="brand-icon">🏛️</div>
+            <div class="brand-text">
+                <h1>EstateAI</h1>
+                <span>Real Estate Intelligence</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="status-pill">
+        <span class="pulse-dot"></span>
+        19 Active Zones
+    </div>
+</header>
+
+<!-- Main Page Content -->
+<main class="main-wrapper">
+    {% block content %}{% endblock %}
+
+    <footer class="site-footer">
+        <p>Built with <strong>Python, Flask, Leaflet.js & scikit-learn</strong> • Dataset: <strong>Kaggle Real Estate Cleaned (742 listings)</strong></p>
+        <p style="margin-top: 4px; font-size: 11px;">Multipage Architecture: <a href="/">Calculator</a> • <a href="/map">Territory Map</a> • <a href="/about">Project Documentation</a></p>
+    </footer>
+</main>
+
+<script>
+    // Smooth Toggle for Slide-out Drawer Sidebar
+    function toggleSidebar() {
+        const drawer = document.getElementById('sidebarDrawer');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        drawer.classList.toggle('open');
+        backdrop.classList.toggle('open');
+    }
+
+    // Close on Escape key
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const drawer = document.getElementById('sidebarDrawer');
+            if (drawer.classList.contains('open')) {
+                toggleSidebar();
+            }
+        }
+    });
+</script>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>
