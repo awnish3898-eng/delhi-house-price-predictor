@@ -279,7 +279,7 @@
 
     .comparison-cards-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 16px;
         margin-top: 20px;
     }
@@ -366,7 +366,7 @@
         ⚡ Multi-Model Valuation Engine
     </div>
     <h2>Smart House Price Valuation with <span class="gradient-text">Machine Learning</span></h2>
-    <p>Predict residential property rates using Random Forest, Linear Regression, and Decision Trees across 19 verified Delhi-NCR localities.</p>
+    <p>Predict residential property rates using Linear Regression and Decision Tree algorithms across 19 verified Delhi-NCR localities.</p>
 </section>
 
 <!-- Main Predictor Card -->
@@ -419,7 +419,7 @@
                         </option>
                     {% endfor %}
                 </select>
-                <span class="field-hint">Random Forest achieves highest R² accuracy (80.8%)</span>
+                <span class="field-hint">Linear Regression achieves highest R² accuracy (79.3%)</span>
             </div>
 
             <!-- Built-up Area -->
@@ -486,16 +486,25 @@
 
     <!-- Prediction Results Card -->
     {% if results %}
+        {% set active_model = form_data.model_choice if form_data.model_choice in results.predictions else 'Linear Regression' %}
         <div class="results-section" id="resultsBlock">
             <div class="hero-result-card">
                 <div class="hero-result-badge">
-                    🏆 Top Valuation: Random Forest Regressor
+                    {% if active_model == 'Decision Tree' %}
+                        🌳 Selected Valuation: Decision Tree Regressor
+                    {% else %}
+                        🏆 Top Valuation: Linear Regression Regressor
+                    {% endif %}
                 </div>
                 <div class="hero-price">
-                    {{ results.predictions['Random Forest'].formatted_price }}
+                    {{ results.predictions[active_model].formatted_price }}
                 </div>
                 <p style="color: var(--text-muted); font-size: 13.5px;">
-                    Estimated market value based on 100 bagged trees trained on regional transaction patterns.
+                    {% if active_model == 'Decision Tree' %}
+                        Estimated market value based on hierarchical decision rules and regional transaction partitions.
+                    {% else %}
+                        Estimated market value based on multivariate linear regression with regional price coefficients.
+                    {% endif %}
                 </p>
                 <div class="property-meta-chips">
                     <span class="meta-chip">📍 {{ form_data.location }}</span>
@@ -505,22 +514,11 @@
                 </div>
             </div>
 
-            <!-- Comparison Cards Across All 3 Models -->
+            <!-- Comparison Cards Across Models -->
             <div class="comparison-cards-grid">
-                <!-- Random Forest -->
-                <div class="model-card featured">
-                    <span class="model-badge badge-rf">🌲 Ensemble Winner</span>
-                    <div class="model-title">Random Forest</div>
-                    <div class="model-val">{{ results.predictions['Random Forest'].formatted_price }}</div>
-                    <div class="model-footer-stats">
-                        <span>R²: <strong>{{ metrics['Random Forest']['R2 Score'] }}</strong></span>
-                        <span>MAE: <strong>₹ {{ metrics['Random Forest']['MAE (₹ Lakh)'] }}L</strong></span>
-                    </div>
-                </div>
-
                 <!-- Linear Regression -->
-                <div class="model-card">
-                    <span class="model-badge badge-lr">📈 Linear Model</span>
+                <div class="model-card {% if active_model == 'Linear Regression' or form_data.model_choice == 'All (Compare All Models)' %}featured{% endif %}">
+                    <span class="model-badge badge-lr">📈 Linear Model (Top R²)</span>
                     <div class="model-title">Linear Regression</div>
                     <div class="model-val">{{ results.predictions['Linear Regression'].formatted_price }}</div>
                     <div class="model-footer-stats">
@@ -530,8 +528,8 @@
                 </div>
 
                 <!-- Decision Tree -->
-                <div class="model-card">
-                    <span class="model-badge badge-dt">🌳 Single Tree</span>
+                <div class="model-card {% if active_model == 'Decision Tree' %}featured{% endif %}">
+                    <span class="model-badge badge-dt">🌳 Decision Tree</span>
                     <div class="model-title">Decision Tree</div>
                     <div class="model-val">{{ results.predictions['Decision Tree'].formatted_price }}</div>
                     <div class="model-footer-stats">

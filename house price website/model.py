@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
@@ -30,9 +29,8 @@ HEATMAP_PATH = os.path.join(STATIC_DIR, "model_comparison_heatmap.png")
 # Models dictionary cache
 TRAINED_MODELS = {}
 MODEL_METRICS = {
-    "Random Forest": {"R2 Score": 0.808, "MAE (₹ Lakh)": 48.12, "RMSE (₹ Lakh)": 84.02},
     "Linear Regression": {"R2 Score": 0.793, "MAE (₹ Lakh)": 59.03, "RMSE (₹ Lakh)": 87.34},
-    "Decision Tree": {"R2 Score": 0.751, "MAE (₹ Lakh)": 57.43, "RMSE (₹ Lakh)": 95.61}
+    "Decision Tree": {"R2 Score": 0.783, "MAE (₹ Lakh)": 56.33, "RMSE (₹ Lakh)": 89.32}
 }
 
 def get_locations():
@@ -67,7 +65,7 @@ def format_inr(amount):
         return f"₹ {amount:,.0f}"
 
 def train_all_models():
-    """Train Linear Regression, Decision Tree, and Random Forest models and generate comparison heatmap."""
+    """Train Linear Regression and Decision Tree models and generate comparison heatmap."""
     global TRAINED_MODELS, MODEL_METRICS
     
     os.makedirs(STATIC_DIR, exist_ok=True)
@@ -86,9 +84,8 @@ def train_all_models():
     )
 
     regressors = {
-        "Random Forest": RandomForestRegressor(n_estimators=100, random_state=42, max_depth=10),
         "Linear Regression": LinearRegression(),
-        "Decision Tree": DecisionTreeRegressor(random_state=42, max_depth=8)
+        "Decision Tree": DecisionTreeRegressor(random_state=42, max_depth=7)
     }
 
     metrics_dict = {}

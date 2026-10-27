@@ -9,7 +9,6 @@ load_or_train()
 
 MODEL_OPTIONS = [
     "All (Compare All Models)",
-    "Random Forest",
     "Linear Regression",
     "Decision Tree"
 ]

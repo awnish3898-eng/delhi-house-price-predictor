@@ -123,7 +123,7 @@
         <h3>🎯 Project Overview</h3>
         <p>
             <strong>EstateAI</strong> is a machine learning web application that estimates residential real estate prices across 19 prime Delhi-NCR localities. 
-            It compares three distinct regression algorithms (<strong>Random Forest</strong>, <strong>Linear Regression</strong>, and <strong>Decision Tree</strong>) 
+            It compares two distinct regression algorithms (<strong>Linear Regression</strong> and <strong>Decision Tree</strong>) 
             and features an interactive geospatial map capable of distinguishing between operational territory and unsupported cities in real-time.
         </p>
     </div>
@@ -154,7 +154,7 @@
             </div>
             <div class="tech-box">
                 <h4>scikit-learn</h4>
-                <p>Core machine learning library used for One-Hot Encoding, Linear Regression, and Random Forest bagging.</p>
+                <p>Core machine learning library used for One-Hot Encoding, Linear Regression, and Decision Tree regression modeling.</p>
             </div>
             <div class="tech-box">
                 <h4>Leaflet.js + OSM</h4>
@@ -175,16 +175,25 @@
         </div>
     </div>
 
-    <!-- Section 4: Project Viva Questions -->
+    <!-- Section 4: Heatmap Analysis -->
+    <div class="doc-section">
+        <h3>📊 Feature Correlation & Algorithm Evaluation</h3>
+        <p>
+            The training pipeline automatically computes Pearson correlation across numerical features and evaluates test-set performance metrics (R² Score, Mean Absolute Error, Root Mean Squared Error) for each algorithm:
+        </p>
+        <div style="text-align: center; margin-top: 14px;">
+            <img src="{{ url_for('static', filename='model_comparison_heatmap.png') }}" alt="Model Comparison Heatmap" style="max-width: 100%; height: auto; border-radius: var(--radius-md); border: 1.5px solid #fed7aa; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+        </div>
+    </div>
+
+    <!-- Section 5: Project Viva Questions -->
     <div class="doc-section">
         <h3>🎓 Common Viva & Interview Questions</h3>
         
         <div class="viva-card">
-            <div class="viva-question">Q1: Why does Random Forest perform better than Linear Regression on this dataset?</div>
+            <div class="viva-question">Q1: How do Linear Regression and Decision Tree compare on this dataset?</div>
             <div class="viva-answer">
-                Real estate prices do not scale in a purely linear manner; luxury sectors and larger configurations have non-linear price spikes. 
-                Random Forest aggregates 100 decision trees trained on random subsets of data and features, capturing these non-linearities 
-                while preventing single-tree overfitting, yielding an <strong>R² score of 80.8%</strong> compared to 79.3% for Linear Regression.
+                Linear Regression provides strong overall interpretability and models global price scaling per square foot across localities (achieving an <strong>R² score of 79.3%</strong>). In comparison, Decision Tree captures localized non-linear thresholds and step-ups between configurations (achieving an <strong>R² score of 78.3%</strong> and lower MAE of ₹56.33 Lakhs). Comparing both provides insights into linear trends vs. discrete regional price brackets.
             </div>
         </div>
 
