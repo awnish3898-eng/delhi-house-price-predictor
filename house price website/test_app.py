@@ -49,13 +49,14 @@ def run_tests():
         assert res_analytics.status_code == 404
         print("  [PASS] /analytics route is removed and returns 404")
 
-        # Page 4: GET /about (Project Documentation & Viva Guide)
+        # Page 3: GET /about (Project Documentation & Architecture)
         res_about = client.get("/about")
         assert res_about.status_code == 200
         assert b"Project Documentation & Architecture" in res_about.data
         assert b"clean_kaggle_data.py" in res_about.data
         assert b"Random Forest" not in res_about.data, "Random Forest should not appear in About documentation"
-        print("  [PASS] Page 4: GET /about (Project Documentation & Viva Guide) loaded")
+        assert b"Viva" not in res_about.data, "Viva questions should be removed from About documentation"
+        print("  [PASS] Page 3: GET /about (Project Documentation & Architecture) loaded")
 
         # POST / with valid location (Dwarka) and All models
         valid_res = client.post("/", data={
