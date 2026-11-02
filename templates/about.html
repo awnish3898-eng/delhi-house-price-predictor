@@ -70,27 +70,6 @@
         line-height: 1.5;
     }
 
-    .viva-card {
-        background: #fffaf5;
-        border: 1.5px solid #ffedd5;
-        border-radius: var(--radius-md);
-        padding: 18px 20px;
-        margin-bottom: 12px;
-    }
-
-    .viva-question {
-        font-size: 14.5px;
-        font-weight: 800;
-        color: #1e293b;
-        margin-bottom: 6px;
-    }
-
-    .viva-answer {
-        font-size: 13.5px;
-        color: #475569;
-        line-height: 1.6;
-    }
-
     .btn-action-start {
         display: inline-flex;
         background: var(--primary-gradient);
@@ -114,7 +93,7 @@
 {% block content %}
 <section class="about-hero">
     <h2>📖 Project Documentation & Architecture</h2>
-    <p>Comprehensive overview of data curation, machine learning algorithms, geospatial validation, and technical viva preparation.</p>
+    <p>Comprehensive overview of data curation, machine learning algorithms, and geospatial validation architecture.</p>
 </section>
 
 <div class="glass-card">
@@ -183,36 +162,6 @@
         </p>
         <div style="text-align: center; margin-top: 14px;">
             <img src="{{ url_for('static', filename='model_comparison_heatmap.png') }}" alt="Model Comparison Heatmap" style="max-width: 100%; height: auto; border-radius: var(--radius-md); border: 1.5px solid #fed7aa; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
-        </div>
-    </div>
-
-    <!-- Section 5: Project Viva Questions -->
-    <div class="doc-section">
-        <h3>🎓 Common Viva & Interview Questions</h3>
-        
-        <div class="viva-card">
-            <div class="viva-question">Q1: How do Linear Regression and Decision Tree compare on this dataset?</div>
-            <div class="viva-answer">
-                Linear Regression provides strong overall interpretability and models global price scaling per square foot across localities (achieving an <strong>R² score of 79.3%</strong>). In comparison, Decision Tree captures localized non-linear thresholds and step-ups between configurations (achieving an <strong>R² score of 78.3%</strong> and lower MAE of ₹56.33 Lakhs). Comparing both provides insights into linear trends vs. discrete regional price brackets.
-            </div>
-        </div>
-
-        <div class="viva-card">
-            <div class="viva-question">Q2: How does the map detect if a clicked location is invalid?</div>
-            <div class="viva-answer">
-                The map combines two checks: first, a client-side Haversine distance check to measure proximity to the 19 supported operating hubs 
-                (threshold: 5.0 km). Second, if outside, it queries the free OpenStreetMap Nominatim reverse geocoding API to resolve the exact 
-                city name (e.g. Gurugram, Ghaziabad, Jaipur) and displays a clear "Service Unavailable" alert.
-            </div>
-        </div>
-
-        <div class="viva-card">
-            <div class="viva-question">Q3: How are categorical location strings handled by the ML model?</div>
-            <div class="viva-answer">
-                Machine learning models require numerical matrices. We use <code>OneHotEncoder(handle_unknown='ignore')</code> wrapped inside a 
-                <code>ColumnTransformer</code> pipeline. This converts each locality into binary indicator features (0 or 1) without imposing 
-                an artificial ordinal hierarchy.
-            </div>
         </div>
     </div>
 
